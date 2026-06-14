@@ -3,7 +3,7 @@
   "version": "0.0.1-beta",
   "license": "MIT",
   "author": "Xingzeng Bao",
-  "homepage": "https://github.com/baoxingzeng/fetch-xhr",
+  "homepage": "https://github.com/baoxingzeng/fetch-xhr-shim",
   "description": "A globalThis.fetch JavaScript polyfill.",
   "type": "module",
   "main": "dist/cjs/index.js",
