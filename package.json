@@ -1,5 +1,5 @@
 {
-  "name": "fetch-xhr",
+  "name": "fetch-xhr-shim",
   "version": "0.0.1-beta",
   "license": "MIT",
   "author": "Xingzeng Bao",

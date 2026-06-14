@@ -28,7 +28,7 @@ import {
     fixXMLHttpRequest,
     fixWebSocket
 } from "../dist/esm/index.js";
-// } from "../dist/fetch-xhr.esm.min.js";
+// } from "../dist/fetch-xhr-shim.esm.min.js";
 
 export {
     setReadableStreamClass,

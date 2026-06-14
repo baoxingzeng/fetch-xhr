@@ -24,7 +24,7 @@ export default [
     {
         input: "src/index.ts",
         output: {
-            file: "dist/fetch-xhr.cjs.min.js",
+            file: "dist/fetch-xhr-shim.cjs.min.js",
             format: "cjs",
         },
         plugins: [
@@ -57,7 +57,7 @@ export default [
     {
         input: "src/index.ts",
         output: {
-            file: "dist/fetch-xhr.esm.min.js",
+            file: "dist/fetch-xhr-shim.esm.min.js",
             format: "es",
         },
         plugins: [
