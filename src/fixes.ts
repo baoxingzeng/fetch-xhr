@@ -66,9 +66,9 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
         }
     }
 
-    function _fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    function _fetch(this: typeof globalThis, input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
         if (isPolyfillType<Request>("Request", input) as never) {
-            return fetchP(input, init);
+            return fetchP.call(this, input, init);
         }
 
         if (init && init.headers && isPolyfillType<Headers>("Headers", init.headers)) {
@@ -83,7 +83,7 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
             }
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((function (this: typeof globalThis, resolve: (v: Response | PromiseLike<Response>) => void, reject: (e: Error) => void) {
             if (init && init.body && isPolyfillType<FormData>("FormData", init.body)) {
                 init.body = FormData_toBlob(init.body);
             }
@@ -104,12 +104,12 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
                     input.signal.addEventListener("abort", abortFn);
                 }
 
-                payload.promise.then(r => {
+                payload.promise.then((function (this: typeof globalThis, r: string | ArrayBuffer) {
                     init.body = r !== "" ? r : null;
-                    if (!aborted) { resolve(fetchFn(input, init)); }
+                    if (!aborted) { resolve(fetchFn.call(this, input, init)); }
                     else { reject(new DOMException("The user aborted a request.", "AbortError")); }
                     processing = false;
-                })
+                }).bind(this))
                     .catch((e: Error) => {
                         reject(new TypeError("Failed to fetch"));
                         console.error(e);
@@ -120,9 +120,9 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
                 if (init && init.body && isPolyfillType<URLSearchParams>("URLSearchParams", init.body)) {
                     setContentType(init, "application/x-www-form-urlencoded;charset=UTF-8");
                 }
-                resolve(fetchFn(input, init));
+                resolve(fetchFn.call(this, input, init));
             }
-        });
+        }).bind(this));
     }
 
     _fetch["__MPHTTPX__Polyfill__"] = true;
