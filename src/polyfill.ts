@@ -30,6 +30,17 @@ const g: typeof globalThis =
     (typeof global !== "undefined" && global) ||
     {};
 
+if (!g.fetch) {
+    g.fetch = fetchP;
+    if (!g.Headers) { g.Headers = HeadersP; }
+    if (!g.Request) { g.Request = RequestP; }
+    if (!g.Response) { g.Response = ResponseP; }
+} else {
+    if (!g.Blob || !g.FormData) {
+        g.fetch = fixFetch();
+    }
+}
+
 if (typeof XMLHttpRequest !== "undefined" && XMLHttpRequest) {
     if (!g.Blob || !g.FormData) {
         fixXMLHttpRequest();
@@ -47,7 +58,6 @@ if (!g.TextDecoder) { g.TextDecoder = TextDecoderP; }
 
 if (!g.EventTarget) {
     g.EventTarget = EventTargetP;
-
     if (!g.Event) { g.Event = EventP; }
     if (!g.CustomEvent) { g.CustomEvent = CustomEventP; }
 }
@@ -57,20 +67,9 @@ if (!g.AbortSignal) { g.AbortSignal = AbortSignalP; }
 
 if (!g.FileReader) {
     g.FileReader = FileReaderP;
-
     if (!g.Blob) { g.Blob = BlobP; }
     if (!g.File) { g.File = FileP; }
 }
 
 if (!g.URLSearchParams) { g.URLSearchParams = URLSearchParamsP; }
 if (!g.FormData) { g.FormData = FormDataP; }
-
-if (!g.fetch) {
-    g.fetch = fetchP;
-
-    if (!g.Headers) { g.Headers = HeadersP; }
-    if (!g.Request) { g.Request = RequestP; }
-    if (!g.Response) { g.Response = ResponseP; }
-} else {
-    g.fetch = fixFetch();
-}
