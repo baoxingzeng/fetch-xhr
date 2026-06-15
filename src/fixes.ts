@@ -1,5 +1,6 @@
 import { fetchP } from "./fetch-api/fetchP";
 import { Payload } from "./fetch-api/BodyImpl";
+import { createPhonyPayload } from "./fetch-api/RequestP";
 import { FormData_toBlob } from "./network/FormDataP";
 import { isEventTarget } from "./event-system/EventTargetP";
 import { DOMException, setState, isPolyfillType, isSequence } from "./utils";
@@ -67,8 +68,28 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
     }
 
     function _fetch(this: typeof globalThis, input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-        if (isPolyfillType<Request>("Request", input) as never) {
-            return fetchP.call(this, input, init);
+        if (isPolyfillType<Request>("Request", input)) {
+            let _input = input as Request;
+            let _init = init || {};
+
+            if (!_init.method) { _init.method = _input.method; }
+            if (!_init.headers) { _init.headers = _input.headers; }
+            if (!_init.mode) { _init.mode = _input.mode; }
+            if (!_init.cache) { _init.cache = _input.cache; }
+            if (!_init.credentials) { _init.credentials = _input.credentials; }
+
+            // @ts-ignore RequestP-AbortSignal
+            if (!_init.signal && _input.__Request__.signal) {
+                _init.signal = _input.signal;
+            }
+
+            if (!_init.body) {
+                // RequestP-PhonyPayload
+                _init.body = createPhonyPayload(_input) as never;
+            }
+
+            input = _input.url;
+            init = _init;
         }
 
         if (init && init.headers && isPolyfillType<Headers>("Headers", init.headers)) {
@@ -88,10 +109,14 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
                 init.body = FormData_toBlob(init.body);
             }
 
-            if (init && init.body && isPolyfillType<Blob>("Blob", init.body)) {
-                let payload = new Payload(init.body);
+            let payload = init && init.body && (
+                (isPolyfillType<Blob>("Blob", init.body) && new Payload(init.body)) ||
+                (Payload.prototype.isPrototypeOf(init.body) && init.body as never)  // RequestP-PhonyPayload
+            );
+
+            if (payload) {
                 if (payload.type) {
-                    setContentType(init, payload.type);
+                    setContentType(init!, payload.type);
                 }
 
                 let removeFn: (() => void) | null = null;
@@ -100,12 +125,12 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
 
                 if (input && typeof input === "object" && "signal" in input && isEventTarget(input.signal)) {
                     let abortFn = () => { if (processing) { aborted = true; } removeFn!(); }
-                    removeFn = () => { input.signal.removeEventListener("abort", abortFn); }
+                    removeFn = () => { (input.signal as EventTarget).removeEventListener("abort", abortFn); }
                     input.signal.addEventListener("abort", abortFn);
                 }
 
                 payload.promise.then((function (this: typeof globalThis, r: string | ArrayBuffer) {
-                    init.body = r !== "" ? r : null;
+                    init!.body = r !== "" ? r : null;
                     if (!aborted) { resolve(fetchFn.call(this, input, init)); }
                     else { reject(new DOMException("The user aborted a request.", "AbortError")); }
                     processing = false;

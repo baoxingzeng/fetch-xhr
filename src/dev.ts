@@ -14,7 +14,7 @@ export { isFormData, FormData_toBlob, extractBoundary, createFormDataFromBinaryT
 
 export { isHeaders, normalizeName, normalizeValue, parseHeaders, createHeaders } from "./fetch-api/HeadersP";
 export { Payload, BodyImpl, initBody } from "./fetch-api/BodyImpl";
-export { normalizeMethod } from "./fetch-api/RequestP";
+export { normalizeMethod, createPhonyPayload } from "./fetch-api/RequestP";
 
 export { DOMException, DOMExceptionP } from "./utils";
 export { _Symbol, className, setState, isObjectType, isPolyfillType, isSequence, checkArgsLength } from "./utils";

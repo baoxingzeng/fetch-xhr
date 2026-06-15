@@ -129,7 +129,7 @@ function isExternalRequest(value: unknown): value is Request {
         && typeof (value as (object & Record<"arrayBuffer", unknown>)).arrayBuffer === "function";
 }
 
-function createPhonyPayload(request: Request): Payload {
+export function createPhonyPayload(request: Request): Payload {
     let payload = Object.create(Payload.prototype) as Payload;
     payload.type = request.headers.get("Content-Type") || "";
 
