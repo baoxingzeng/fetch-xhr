@@ -22,4 +22,4 @@ export { Response, ResponseP } from "./fetch-api/ResponseP";
 
 export { setReadableStreamClass } from "./file-system/BlobP";
 export { setXMLHttpRequestClass } from "./fetch-api/fetchP";
-export { fixFetch, fixXMLHttpRequest, fixWebSocket } from "./fixes";
+export { fixFetch, fixXMLHttpRequest, fixWebSocket, setFullOverride } from "./fixes";

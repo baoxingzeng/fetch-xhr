@@ -38,7 +38,8 @@
   ],
   "scripts": {
     "build": "rollup --config",
-    "test": "node tests/test.js"
+    "test": "node tests/test.js",
+    "test:xhr": "node tests/test-xhr.js"
   },
   "keywords": [
     "fetch",

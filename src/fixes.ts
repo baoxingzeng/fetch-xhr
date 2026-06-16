@@ -1,9 +1,13 @@
 import { fetchP } from "./fetch-api/fetchP";
 import { Payload } from "./fetch-api/BodyImpl";
 import { createPhonyPayload } from "./fetch-api/RequestP";
-import { FormData_toBlob } from "./network/FormDataP";
+import { isBlob } from "./file-system/BlobP";
+import { isFormData, FormData_toBlob } from "./network/FormDataP";
 import { isEventTarget } from "./event-system/EventTargetP";
 import { DOMException, setState, isPolyfillType, isSequence } from "./utils";
+
+const fullOverride = { value: false };
+export function setFullOverride(value: boolean) { fullOverride.value = !!value; }
 
 export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
     const fetchFn = fetchFunc as typeof fetch || (typeof fetch !== "undefined" && fetch);
@@ -105,12 +109,12 @@ export function fixFetch(fetchFunc?: typeof fetch): typeof fetch {
         }
 
         return new Promise((function (this: typeof globalThis, resolve: (v: Response | PromiseLike<Response>) => void, reject: (e: Error) => void) {
-            if (init && init.body && isPolyfillType<FormData>("FormData", init.body)) {
-                init.body = FormData_toBlob(init.body);
+            if (init && init.body && (fullOverride.value ? isFormData(init.body) : isPolyfillType<FormData>("FormData", init.body))) {
+                init.body = FormData_toBlob(init.body as FormData);
             }
 
             let payload = init && init.body && (
-                (isPolyfillType<Blob>("Blob", init.body) && new Payload(init.body)) ||
+                ((fullOverride.value ? isBlob(init.body) : isPolyfillType<Blob>("Blob", init.body)) && new Payload(init.body as Blob)) ||
                 (Payload.prototype.isPrototypeOf(init.body) && init.body as never)  // RequestP-PhonyPayload
             );
 
@@ -176,15 +180,15 @@ export function fixXMLHttpRequest(XHRClass?: typeof XMLHttpRequest) {
     }
 
     Klass.prototype.send = function (this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null): void {
-        if (isPolyfillType<FormData>("FormData", body)) {
-            body = FormData_toBlob(body);
+        if (fullOverride.value ? isFormData(body) : isPolyfillType<FormData>("FormData", body)) {
+            body = FormData_toBlob(body as FormData);
             if (!state(this).hasContentType) {
                 this.setRequestHeader("Content-Type", body.type);
             }
         }
 
-        if (isPolyfillType<Blob>("Blob", body)) {
-            let payload = new Payload(body);
+        if (fullOverride.value ? isBlob(body) : isPolyfillType<Blob>("Blob", body)) {
+            let payload = new Payload(body as Blob);
             if (payload.type && !state(this).hasContentType) {
                 this.setRequestHeader("Content-Type", payload.type);
             }
@@ -244,7 +248,7 @@ export function fixWebSocket(WSClass?: typeof WebSocket) {
 
     const _send = Klass.prototype.send;
     Klass.prototype.send = function (data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
-        if (isPolyfillType<Blob>("Blob", data)) {
+        if (fullOverride.value ? isBlob(data) : isPolyfillType<Blob>("Blob", data)) {
             let payload = new Payload(data);
             payload.promise.then(r => {
                 if (this.readyState !== 1 /* OPEN */) return;

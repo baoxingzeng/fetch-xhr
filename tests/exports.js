@@ -24,18 +24,22 @@ import {
 
     setReadableStreamClass,
     setXMLHttpRequestClass,
+
     fixFetch,
     fixXMLHttpRequest,
-    fixWebSocket
+    fixWebSocket,
+    setFullOverride
 } from "../dist/esm/index.js";
 // } from "../dist/fetch-xhr-shim.esm.min.js";
 
 export {
     setReadableStreamClass,
     setXMLHttpRequestClass,
+
     fixFetch,
     fixXMLHttpRequest,
-    fixWebSocket
+    fixWebSocket,
+    setFullOverride
 };
 
 export const protagonistConfig = {
